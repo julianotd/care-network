@@ -4,14 +4,14 @@
 -- =============================================================
 
 -- Extensões
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 
 -- =============================================================
 -- ORGANIZAÇÃO
 -- =============================================================
 CREATE TABLE clinicas (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   nome TEXT NOT NULL,
   cnpj TEXT UNIQUE,
   endereco JSONB,
@@ -23,7 +23,7 @@ CREATE TABLE clinicas (
 -- USUÁRIOS (Auth via Supabase Auth)
 -- =============================================================
 CREATE TABLE perfis (
-  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   nome TEXT NOT NULL,
   tipo TEXT NOT NULL CHECK (tipo IN ('coordenador','profissional','familia')),
   avatar_url TEXT,
@@ -36,7 +36,7 @@ CREATE TABLE perfis (
 -- PROFISSIONAIS
 -- =============================================================
 CREATE TABLE profissionais (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   perfil_id UUID REFERENCES perfis(id) ON DELETE CASCADE,
   clinica_id UUID REFERENCES clinicas(id),
   registro_conselho TEXT,
@@ -51,7 +51,7 @@ CREATE TABLE profissionais (
 -- PACIENTES
 -- =============================================================
 CREATE TABLE pacientes (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   clinica_id UUID REFERENCES clinicas(id),
   nome TEXT NOT NULL,
   data_nascimento DATE NOT NULL,
@@ -75,7 +75,7 @@ CREATE TABLE circulo_cuidado (
 
 -- Responsáveis / Família
 CREATE TABLE responsaveis (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   perfil_id UUID REFERENCES perfis(id) ON DELETE CASCADE,
   paciente_id UUID REFERENCES pacientes(id) ON DELETE CASCADE,
   parentesco TEXT NOT NULL,
@@ -86,7 +86,7 @@ CREATE TABLE responsaveis (
 -- LOCAIS
 -- =============================================================
 CREATE TABLE locais (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   clinica_id UUID REFERENCES clinicas(id),
   nome TEXT NOT NULL,
   tipo TEXT NOT NULL CHECK (tipo IN ('clinica','escola','domicilio','ar_livre')),
@@ -102,7 +102,7 @@ CREATE TABLE locais (
 -- PLANO TERAPÊUTICO INTEGRADO (PTI)
 -- =============================================================
 CREATE TABLE planos_terapeuticos (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   paciente_id UUID REFERENCES pacientes(id) ON DELETE CASCADE,
   versao SMALLINT DEFAULT 1,
   status TEXT DEFAULT 'ativo' CHECK (status IN ('ativo','arquivado','rascunho')),
@@ -110,7 +110,7 @@ CREATE TABLE planos_terapeuticos (
 );
 
 CREATE TABLE objetivos (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   plano_id UUID REFERENCES planos_terapeuticos(id) ON DELETE CASCADE,
   descricao TEXT NOT NULL,
   profissional_lider_id UUID REFERENCES profissionais(id),
@@ -123,7 +123,7 @@ CREATE TABLE objetivos (
 );
 
 CREATE TABLE estrategias (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   objetivo_id UUID REFERENCES objetivos(id) ON DELETE CASCADE,
   profissional_id UUID REFERENCES profissionais(id),
   descricao TEXT NOT NULL,
@@ -134,7 +134,7 @@ CREATE TABLE estrategias (
 -- SESSÕES / AGENDA
 -- =============================================================
 CREATE TABLE sessoes (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   paciente_id UUID REFERENCES pacientes(id),
   profissional_id UUID REFERENCES profissionais(id),
   local_id UUID REFERENCES locais(id),
@@ -152,7 +152,7 @@ CREATE TABLE sessoes (
 -- DIÁRIO DE BORDO
 -- =============================================================
 CREATE TABLE diario_bordo (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   paciente_id UUID REFERENCES pacientes(id) ON DELETE CASCADE,
   data DATE NOT NULL DEFAULT CURRENT_DATE,
   humor TEXT,
@@ -168,7 +168,7 @@ CREATE TABLE diario_bordo (
 -- CHAT SEGMENTADO
 -- =============================================================
 CREATE TABLE canais (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   paciente_id UUID REFERENCES pacientes(id) ON DELETE CASCADE,
   tipo TEXT NOT NULL CHECK (tipo IN ('comunicacao','sensorial','rotina','geral')),
   nome TEXT NOT NULL,
@@ -176,7 +176,7 @@ CREATE TABLE canais (
 );
 
 CREATE TABLE mensagens (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   canal_id UUID REFERENCES canais(id) ON DELETE CASCADE,
   autor_id UUID NOT NULL,
   autor_tipo TEXT NOT NULL CHECK (autor_tipo IN ('profissional','familia','coordenador')),
@@ -197,7 +197,7 @@ CREATE TABLE canal_participantes (
 -- FEED DE EVOLUÇÃO
 -- =============================================================
 CREATE TABLE posts_feed (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   paciente_id UUID REFERENCES pacientes(id) ON DELETE CASCADE,
   autor_id UUID NOT NULL,
   autor_tipo TEXT NOT NULL,
@@ -212,7 +212,7 @@ CREATE TABLE posts_feed (
 -- CHECKLIST DE GENERALIZAÇÃO
 -- =============================================================
 CREATE TABLE generalizacao (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   paciente_id UUID REFERENCES pacientes(id),
   objetivo_id UUID REFERENCES objetivos(id),
   descricao TEXT NOT NULL,
@@ -233,8 +233,8 @@ ALTER TABLE mensagens ENABLE ROW LEVEL SECURITY;
 ALTER TABLE planos_terapeuticos ENABLE ROW LEVEL SECURITY;
 
 -- Políticas básicas (expandir conforme necessidade)
-CREATE POLICY "perfis_own" ON perfis FOR ALL USING (id = auth.uid());
-CREATE POLICY "clinica_isolation" ON pacientes FOR ALL
+-- CREATE POLICY "perfis_own" ON perfis FOR ALL USING (id = auth.uid());
+-- CREATE POLICY "clinica_isolation" ON pacientes FOR ALL
   USING (clinica_id IN (SELECT clinica_id FROM perfis WHERE id = auth.uid()));
 
 -- =============================================================
