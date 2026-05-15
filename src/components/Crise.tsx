@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { PACIENTES, PROFISSIONAIS } from '@/lib/mock-data';
+import { useNotifications } from '@/lib/notifications';
 
 interface Props {
   pacienteId: string;
@@ -9,8 +10,10 @@ interface Props {
 
 export function Crise({ pacienteId }: Props) {
   const paciente = PACIENTES.find(p => p.id === pacienteId);
+  const { sendCrisisAlert, isSubscribed, subscribe } = useNotifications();
   const [ativado, setAtivado] = useState(false);
   const [protocolo, setProtocolo] = useState(false);
+  const [notificacaoEnviada, setNotificacaoEnviada] = useState(false);
 
   const profissionaisProximos = PROFISSIONAIS.slice(0, 2);
 
@@ -26,13 +29,37 @@ export function Crise({ pacienteId }: Props) {
           <>
             <p className="text-slate-600 mb-6">Pressione apenas em caso de emergência comportamental</p>
             <button
-              onClick={() => setAtivado(true)}
+              onClick={async () => {
+                setAtivado(true);
+                // Enviar push notification para todos os profissionais
+                if (paciente) {
+                  try {
+                    const result = await sendCrisisAlert(paciente.id, paciente.nome);
+                    setNotificacaoEnviada(true);
+                    console.log('Notificações de crise enviadas:', result);
+                  } catch (err) {
+                    console.error('Erro ao enviar notificações:', err);
+                  }
+                }
+              }}
               className="w-40 h-40 rounded-full bg-red-500 hover:bg-red-600 text-white text-3xl font-bold shadow-xl hover:shadow-2xl transition-all active:scale-95 mx-auto block"
             >
               🚨<br />
               <span className="text-lg">EM CRISE</span>
             </button>
-            <p className="text-xs text-slate-400 mt-4">Notifica automaticamente o profissional mais próximo e a equipe</p>
+            <p className="text-xs text-slate-400 mt-4">
+              {isSubscribed
+                ? 'Notificações push serão enviadas automaticamente'
+                : 'Ative as notificações push para alertar profissionais automaticamente'}
+            </p>
+            {!isSubscribed && (
+              <button
+                onClick={subscribe}
+                className="mt-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700"
+              >
+                🔔 Ativar Notificações Push
+              </button>
+            )}
           </>
         ) : (
           <div className="space-y-4">

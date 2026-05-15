@@ -13,9 +13,10 @@ import { Relatorios } from '@/components/Relatorios';
 import { Crise } from '@/components/Crise';
 import { Financeiro } from '@/components/Financeiro';
 import { Substituicao } from '@/components/Substituicao';
+import { NotificationSettings } from '@/components/NotificationSettings';
 import { PACIENTES } from '@/lib/mock-data';
 
-type Tab = 'dashboard' | 'agenda' | 'paciente' | 'feed' | 'chat' | 'diario' | 'plano' | 'generalizacao' | 'relatorios' | 'crise' | 'financeiro' | 'substituicao';
+type Tab = 'dashboard' | 'agenda' | 'paciente' | 'feed' | 'chat' | 'diario' | 'plano' | 'generalizacao' | 'relatorios' | 'crise' | 'financeiro' | 'substituicao' | 'notificacoes';
 
 export default function Home() {
   const [tab, setTab] = useState<Tab>('dashboard');
@@ -34,6 +35,7 @@ export default function Home() {
     { key: 'relatorios', label: 'Relatórios', icon: '📄', group: 'Gestão' },
     { key: 'financeiro', label: 'Financeiro', icon: '💰', group: 'Gestão' },
     { key: 'substituicao', label: 'Substituição', icon: '🔄', group: 'Gestão' },
+    { key: 'notificacoes', label: 'Notificações', icon: '🔔', group: 'Gestão' },
   ];
 
   const groups = ['Principal', 'Comunicação', 'Clínico', 'Gestão'];
@@ -103,6 +105,7 @@ export default function Home() {
         {tab === 'crise' && <Crise pacienteId={pacienteSel.id} />}
         {tab === 'financeiro' && <Financeiro />}
         {tab === 'substituicao' && <Substituicao />}
+        {tab === 'notificacoes' && <NotificationSettings />}
       </main>
 
       {/* Footer */}

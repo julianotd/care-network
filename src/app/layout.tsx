@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { NotificationProvider } from "@/lib/notifications";
 
 export const metadata: Metadata = {
   title: "Care Network — Ecossistema de Cuidado em Rede",
@@ -10,7 +11,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pt-BR">
       <body className="bg-slate-50 text-slate-900 antialiased min-h-screen">
-        {children}
+        <NotificationProvider>
+          {children}
+        </NotificationProvider>
       </body>
     </html>
   );
