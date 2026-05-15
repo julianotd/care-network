@@ -18,7 +18,7 @@ export const PACIENTES: Paciente[] = [
   {
     id: 'pac1', nome: 'Miguel Oliveira', dataNascimento: '2019-03-15',
     diagnostico: 'TEA Nível 2 de suporte', nivelSuporte: 2,
-    perfilSensorial: { hipersensitivo: ['auditivo', 'visual'], hipossensitivo: ['proprioceptivo'], sistemaComunicacao: 'PECS nível 3' },
+    perfilSensorial: { hipersensitivo: ['auditivo', 'visual'], hipossensitivo: ['proprioceptivo'] },
     sistemaComunicacao: 'PECS',
     horariosCrise: ['14:00', '16:30'],
     humorHoje: '😊',

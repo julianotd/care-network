@@ -8,23 +8,35 @@ import { Feed } from '@/components/Feed';
 import { Chat } from '@/components/Chat';
 import { DiarioBordo } from '@/components/DiarioBordo';
 import { PlanoTerapeuticoView } from '@/components/PlanoTerapeutico';
+import { Generalizacao } from '@/components/Generalizacao';
+import { Relatorios } from '@/components/Relatorios';
+import { Crise } from '@/components/Crise';
+import { Financeiro } from '@/components/Financeiro';
+import { Substituicao } from '@/components/Substituicao';
 import { PACIENTES } from '@/lib/mock-data';
 
-type Tab = 'dashboard' | 'agenda' | 'paciente' | 'feed' | 'chat' | 'diario' | 'plano';
+type Tab = 'dashboard' | 'agenda' | 'paciente' | 'feed' | 'chat' | 'diario' | 'plano' | 'generalizacao' | 'relatorios' | 'crise' | 'financeiro' | 'substituicao';
 
 export default function Home() {
   const [tab, setTab] = useState<Tab>('dashboard');
   const [pacienteSel, setPacienteSel] = useState(PACIENTES[0]);
 
-  const tabs: { key: Tab; label: string; icon: string }[] = [
-    { key: 'dashboard', label: 'Dashboard', icon: '🏠' },
-    { key: 'agenda', label: 'Agenda', icon: '📅' },
-    { key: 'paciente', label: 'Pacientes', icon: '👤' },
-    { key: 'feed', label: 'Feed', icon: '📱' },
-    { key: 'chat', label: 'Chat', icon: '💬' },
-    { key: 'diario', label: 'Diário', icon: '📔' },
-    { key: 'plano', label: 'Plano Terapêutico', icon: '📋' },
+  const tabs: { key: Tab; label: string; icon: string; group: string }[] = [
+    { key: 'dashboard', label: 'Dashboard', icon: '🏠', group: 'Principal' },
+    { key: 'agenda', label: 'Agenda', icon: '📅', group: 'Principal' },
+    { key: 'paciente', label: 'Pacientes', icon: '👤', group: 'Principal' },
+    { key: 'feed', label: 'Feed', icon: '📱', group: 'Comunicação' },
+    { key: 'chat', label: 'Chat', icon: '💬', group: 'Comunicação' },
+    { key: 'diario', label: 'Diário', icon: '📔', group: 'Comunicação' },
+    { key: 'plano', label: 'Plano Terapêutico', icon: '📋', group: 'Clínico' },
+    { key: 'generalizacao', label: 'Generalização', icon: '✅', group: 'Clínico' },
+    { key: 'crise', label: 'Crise', icon: '🚨', group: 'Clínico' },
+    { key: 'relatorios', label: 'Relatórios', icon: '📄', group: 'Gestão' },
+    { key: 'financeiro', label: 'Financeiro', icon: '💰', group: 'Gestão' },
+    { key: 'substituicao', label: 'Substituição', icon: '🔄', group: 'Gestão' },
   ];
+
+  const groups = ['Principal', 'Comunicação', 'Clínico', 'Gestão'];
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -57,18 +69,23 @@ export default function Home() {
 
       {/* Nav */}
       <nav className="bg-white border-b border-slate-200 px-6 flex gap-1 overflow-x-auto">
-        {tabs.map(t => (
-          <button
-            key={t.key}
-            onClick={() => setTab(t.key)}
-            className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors border-b-2 ${
-              tab === t.key
-                ? 'border-indigo-600 text-indigo-600'
-                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-            }`}
-          >
-            <span className="mr-1.5">{t.icon}</span>{t.label}
-          </button>
+        {groups.map(group => (
+          <div key={group} className="flex items-center">
+            <span className="text-xs text-slate-300 px-2 border-r border-slate-100">{group}</span>
+            {tabs.filter(t => t.group === group).map(t => (
+              <button
+                key={t.key}
+                onClick={() => setTab(t.key)}
+                className={`px-3 py-3 text-sm font-medium whitespace-nowrap transition-colors border-b-2 ${
+                  tab === t.key
+                    ? 'border-indigo-600 text-indigo-600'
+                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                }`}
+              >
+                <span className="mr-1">{t.icon}</span>{t.label}
+              </button>
+            ))}
+          </div>
         ))}
       </nav>
 
@@ -81,11 +98,16 @@ export default function Home() {
         {tab === 'chat' && <Chat pacienteId={pacienteSel.id} />}
         {tab === 'diario' && <DiarioBordo pacienteId={pacienteSel.id} />}
         {tab === 'plano' && <PlanoTerapeuticoView pacienteId={pacienteSel.id} />}
+        {tab === 'generalizacao' && <Generalizacao pacienteId={pacienteSel.id} />}
+        {tab === 'relatorios' && <Relatorios />}
+        {tab === 'crise' && <Crise pacienteId={pacienteSel.id} />}
+        {tab === 'financeiro' && <Financeiro />}
+        {tab === 'substituicao' && <Substituicao />}
       </main>
 
       {/* Footer */}
       <footer className="bg-slate-900 text-slate-400 text-xs px-6 py-3 flex justify-between">
-        <span>Care Network v0.1.0 — MVP</span>
+        <span>Care Network v0.2.0 — MVP</span>
         <span>🔒 LGPD Compliant · Círculos de Cuidado · Dados Criptografados</span>
       </footer>
     </div>
